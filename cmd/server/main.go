@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"log"
 	"minha-primeira-api/handler"
+	"minha-primeira-api/internal/models/database"
 	"net/http"
 )
 
 func main() {
+	database.Connect()
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/getUser", handler.GetUser)
 	mux.HandleFunc("/api/createUser", handler.CreateUser)

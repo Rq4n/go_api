@@ -5,6 +5,4 @@ CREATE TABLE IF NOT EXISTS users(
 );
 
 INSERT INTO users (name, age) VALUES
-('Alice', 25),
-('Ryan', 18),
-('Bob',30);
+('Ryan', 18)
