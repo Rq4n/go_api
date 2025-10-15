@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"minha-primeira-api/internal/models"
+	"minha-primeira-api/pkg/auth"
 	"net/http"
 )
 
@@ -11,22 +12,28 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json")
 
 	var u models.User
-	json.NewDecoder(r.Body).Decode(&u)
-	fmt.Printf("The user request value %v", u)
+	err := json.NewDecoder(r.Body).Decode(&u)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprint(w, "erro ao ler json")
+		return
+	}
 
-	if u.Name == "Chek" && u.Password == "text" {
-		tokenString, err := createToken(u.Name)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Errorf("no username found")
-		}
+	err = models.AuthenticateUser(&u)
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+
+	tokenString, err := auth.CreateToken(u.Name)
+	if err != nil {
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprint(w, tokenString)
 		return
-	} else {
-		w.WriteHeader(http.StatusUnauthorized)
-		fmt.Fprint(w, "invalid credentials")
 	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"token":tokenString})
 }
 
 func ProtectedHandler(w http.ResponseWriter, r *http.Request) {
@@ -39,7 +46,7 @@ func ProtectedHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	tokenString = tokenString[len("Bearer "):]
 
-	err := verifyToken(tokenString)
+	err := auth.VerifyToken(tokenString)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		fmt.Fprint(w, "invalid token")

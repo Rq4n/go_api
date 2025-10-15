@@ -41,6 +41,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	if err := models.InsertUsers(&newUser); err != nil {
 		http.Error(w, "Failed to create user", http.StatusInternalServerError)
+		return
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)

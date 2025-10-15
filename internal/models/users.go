@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"minha-primeira-api/internal/models/database"
 )
 
@@ -9,7 +10,7 @@ type User struct {
 	Name     string `json:"name"`
 	Age      int    `json:"age"`
 	Email    string `json:"email"`
-	Password string `json:password`
+	Password string `json:"password"`
 }
 
 func GetAllUsers() ([]User, error) {
@@ -32,8 +33,8 @@ func GetAllUsers() ([]User, error) {
 
 func InsertUsers(u *User) error {
 	return database.DB.QueryRow(
-		"INSERT INTO users (name, age) VALUES ($1,$2) RETURNING id",
-		u.Name, u.Age,
+		"INSERT INTO users (name, age, email, password) VALUES ($1,$2,$3,$4) RETURNING id",
+		u.Name, u.Age, u.Email, u.Password,
 	).Scan(&u.ID)
 }
 
@@ -45,4 +46,19 @@ func DeleteUsersById(id int) error {
 func UpdateUser(u *User) error {
 	_, err := database.DB.Exec("UPDATE users SET name=$1, age=$2, id=$3", u.Name, u.Age, u.ID)
 	return err
+}
+
+func AuthenticateUser(u *User) error {
+	var id int
+	var passwordDB string
+
+	err := database.DB.QueryRow("SELECT id, password FROM users WHERE email=$1", u.Email).Scan(&id, &passwordDB)
+
+	if err != nil {
+		return errors.New("usuario nao encontrado")
+	}
+	if u.Password != passwordDB {
+		return errors.New("senha invalida")
+	}
+	return nil
 }
