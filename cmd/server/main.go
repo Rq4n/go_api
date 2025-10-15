@@ -11,6 +11,9 @@ import (
 func main() {
 	database.Connect()
 	mux := http.NewServeMux()
+
+	mux.HandleFunc("/login", handler.LoginHandler)
+	mux.HandleFunc("/protected", handler.ProtectedHandler)
 	mux.HandleFunc("/api/getUser", handler.GetUser)
 	mux.HandleFunc("/api/createUser", handler.CreateUser)
 	mux.HandleFunc("/api/deleteUser", handler.DeleteUser)
