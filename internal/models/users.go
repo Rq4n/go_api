@@ -5,9 +5,11 @@ import (
 )
 
 type User struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
-	Age  int    `json:"age"`
+	ID       int    `json:"id"`
+	Name     string `json:"name"`
+	Age      int    `json:"age"`
+	Email    string `json:"email"`
+	Password string `json:password`
 }
 
 func GetAllUsers() ([]User, error) {
@@ -35,12 +37,12 @@ func InsertUsers(u *User) error {
 	).Scan(&u.ID)
 }
 
-func DeleteUsersById(id int) error{
+func DeleteUsersById(id int) error {
 	_, err := database.DB.Exec("DELETE FROM USERS WHERE id=$1", id)
-	return  err
+	return err
 }
 
 func UpdateUser(u *User) error {
-	_, err := database.DB.Exec("UPDATE users SET name=$1, age=$2, id=$3",u.Name, u.Age, u.ID)
+	_, err := database.DB.Exec("UPDATE users SET name=$1, age=$2, id=$3", u.Name, u.Age, u.ID)
 	return err
 }
